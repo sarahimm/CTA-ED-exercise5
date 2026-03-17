@@ -1,23 +1,23 @@
 ---
 title: "CTA-ED Exercise 5: Unsupervised learning (topic models)"
-author: "[Names of all group members here]"
+author: "Sarah Immel"
 date: "13/03/2024"
 output: html_document
 ---
+
 ## Introduction
 
-The hands-on exercise for this week focuses on: 1) estimating a topic model ; 2) interpreting and visualizing results.
-Remember that you will need to: 1) comment your code and 2) write out the interpretation of your results.
+The hands-on exercise for this week focuses on: 1) estimating a topic model ; 2) interpreting and visualizing results. Remember that you will need to: 1) comment your code and 2) write out the interpretation of your results.
 
 You will learn how to:
 
-* Generate document-term-matrices in format appropriate for topic modelling
-* Estimate a topic model using the `quanteda` and `topicmodels` package
-* Visualize results
-* Reverse engineer a test of model accuracy
-* Run some validation tests
+-   Generate document-term-matrices in format appropriate for topic modelling
+-   Estimate a topic model using the `quanteda` and `topicmodels` package
+-   Visualize results
+-   Reverse engineer a test of model accuracy
+-   Run some validation tests
 
-## Setup 
+## Setup
 
 Before proceeding, we'll load the packages we will need for this tutorial.
 
@@ -35,26 +35,24 @@ library(quanteda)
 library(quanteda.textmodels)
 ```
 
-You may need to install the preText package if you haven't done so yet. For that you will need to run the next code chunk (it is currently set to 'eval=F', which tells R 'do not execute this code chunk').
-That package is not readily available on through RStudio directly. It needs to be downloaded from the Github repository set up by its creater Matthew J Denny. We can do that using the command install_github(). This command is part of the 'devtools' package, which you will need to install as well (if you haven't done so already). The devtools package is directly available through R so it can be installed with the usual command install_packages. 
+You may need to install the preText package if you haven't done so yet. For that you will need to run the next code chunk (it is currently set to 'eval=F', which tells R 'do not execute this code chunk'). That package is not readily available on through RStudio directly. It needs to be downloaded from the Github repository set up by its creater Matthew J Denny. We can do that using the command install_github(). This command is part of the 'devtools' package, which you will need to install as well (if you haven't done so already). The devtools package is directly available through R so it can be installed with the usual command install_packages.
 
 ```{r, message=F, eval=F}
-#install_package(devtools)
 devtools::install_github("matthewjdenny/preText")
 library(preText)
 ```
 
-
 # Data collection
-We'll be using data from Alexis de Tocqueville's "Democracy in America." 
 
-We have already downloaded some data for you, but we also included the code to download it yourself (it is currently set to 'eval=F' so it won't run unless you remove the eval=F argument or you run the chunk directly. 
+We'll be using data from Alexis de Tocqueville's "Democracy in America."
 
-The code downloads these data, both Volume 1 and Volume 2, and combine them into one data frame. For this, we'll be using the <tt>gutenbergr</tt> package, which allows the user to download text data from over 60,000 out-of-copyright books. The ID for each book appears in the url for the book selected after a search on [https://www.gutenberg.org/ebooks/](https://www.gutenberg.org/ebooks/).
+We have already downloaded some data for you, but we also included the code to download it yourself (it is currently set to 'eval=F' so it won't run unless you remove the eval=F argument or you run the chunk directly.
+
+The code downloads these data, both Volume 1 and Volume 2, and combine them into one data frame. For this, we'll be using the <tt>gutenbergr</tt> package, which allows the user to download text data from over 60,000 out-of-copyright books. The ID for each book appears in the url for the book selected after a search on <https://www.gutenberg.org/ebooks/>.
 
 This example is adapted by [Text Mining with R: A Tidy Approach](https://www.tidytextmining.com/) by Julia Silge and David Robinson.
 
-![](data/topicmodels/gutenberg.gif){width=100%}
+![](data/topicmodels/gutenberg.gif){width="100%"}
 
 Here, we see that Volume of Tocqueville's "Democracy in America" is stored as "815". A separate search reveals that Volume 2 is stored as "816".
 
@@ -123,11 +121,11 @@ tocq_top_terms %>%
 
 ```
 
-But how do we actually evaluate these topics? Here, the topics all seem pretty similar. 
+But how do we actually evaluate these topics? Here, the topics all seem pretty similar.
 
 ## Evaluating topic model
 
-Well, one way to evaluate the performance of unspervised forms of classification is by testing our model on an outcome that is already known. 
+Well, one way to evaluate the performance of unspervised forms of classification is by testing our model on an outcome that is already known.
 
 Here, two topics that are most obvious are the 'topics' Volume 1 and Volume 2 of Tocqueville's "Democracy in America." Volume 1 of Tocqueville's work deals more obviously with abstract constitutional ideas and questions of race; Volume 2 focuses on more esoteric aspects of American society. Listen an "In Our Time" episode with Melvyn Bragg discussing Democracy in America [here](https://www.bbc.co.uk/programmes/b09vyw0x).
 
@@ -135,7 +133,7 @@ Given these differences in focus, we might think that a generative model could a
 
 ### Plot relative word frequencies
 
-First let's have a look and see whether there really are words obviously distinguishing the two Volumes. 
+First let's have a look and see whether there really are words obviously distinguishing the two Volumes.
 
 ```{r}
 
@@ -175,10 +173,9 @@ ggplot(bookfreq, aes(x = DiA1, y = DiA2, color = abs(DiA1 - DiA2))) +
 
 We see that there do seem to be some marked distinguishing characteristics. In the plot above, for example, we see that more abstract notions of state systems appear with greater frequency in Volume 1 while Volume 2 seems to contain words specific to America (e.g., "north" and "south") with greater frequency. The way to read the above plot is that words positioned further away from the diagonal line appear with greater frequency in one volume versus the other.
 
-
 ### Split into chapter documents
 
-In the below, we first separate the volumes into chapters, then we repeat the same procedure as above. The only difference now is that instead of two documents representing the two full volumes of Tocqueville's work, we now have 132 documents, each representing an individual chapter. Notice now that the sparsity is much increased: around 96%. 
+In the below, we first separate the volumes into chapters, then we repeat the same procedure as above. The only difference now is that instead of two documents representing the two full volumes of Tocqueville's work, we now have 132 documents, each representing an individual chapter. Notice now that the sparsity is much increased: around 96%.
 
 ```{r}
 
@@ -223,7 +220,7 @@ tocq_chapters_lda <- LDA(tocq_chapters_dtm, k = 2, control = list(seed = 1234))
 
 After this, it is worth looking at another output of the latent dirichlet allocation procedure. The γ probability represents the per-document-per-topic probability or, in other words, the probability that a given document (here: chapter) belongs to a particular topic (and here, we are assuming these topics represent volumes).
 
-The gamma values are therefore the estimated proportion of words within a given chapter allocated to a given volume. 
+The gamma values are therefore the estimated proportion of words within a given chapter allocated to a given volume.
 
 ```{r}
 
@@ -290,11 +287,11 @@ Not bad! We see that the model estimated with accuracy 91% of chapters in Volume
 
 ## Validation
 
-In the articles by @ying_topics_2021 and @denny_text_2018 from this and previous weeks, we read about potential validation techniques. 
+In the articles by @ying_topics_2021 and @denny_text_2018 from this and previous weeks, we read about potential validation techniques.
 
 In this section, we'll be using the `preText` package mentioned in @denny_text_2018 to see the impact of different pre-processing choices on our text. Here, I am adapting from a [tutorial](http://www.mjdenny.com/getting_started_with_preText.html) by Matthew Denny.
 
-First we need to reformat our text into a `quanteda` corpus object. 
+First we need to reformat our text into a `quanteda` corpus object.
 
 ```{r}
 
@@ -306,7 +303,8 @@ documents <- corp[sample(1:30000,1000)]
 print(names(documents[1:10]))
 
 ```
-And now we are ready to preprocess in different ways. Here, we are including n-grams so we are preprocessing the text in 128 different ways. This takes about ten minutes to run on a machine with 8GB RAM. 
+
+And now we are ready to preprocess in different ways. Here, we are including n-grams so we are preprocessing the text in 128 different ways. This takes about ten minutes to run on a machine with 8GB RAM.
 
 ```{r, eval = F}
 
@@ -318,8 +316,7 @@ preprocessed_documents <- factorial_preprocessing(
 
 ```
 
-We can then get the results of our pre-processing, comparing the distance between documents that have been processed in different ways. 
-
+We can then get the results of our pre-processing, comparing the distance between documents that have been processed in different ways.
 
 ```{r, eval = F}
 
@@ -332,16 +329,172 @@ preText_results <- preText(
 
 ```
 
-And we can plot these accordingly. 
+And we can plot these accordingly.
 
 ```{r, eval = F}
 preText_score_plot(preText_results)
 ```
 
-![](data/topicmodels/pretext_results.png){width=100%}
+![](data/topicmodels/pretext_results.png){width="100%"}
 
 ## Exercises
 
-1. Choose another book or set of books from Project Gutenberg
-2. Run your own topic model on these books, changing the k of topics, and evaluating accuracy.
-3. Validate different pre-processing techniques using `preText` on the new book(s) of your choice. 
+1.  Choose another book or set of books from Project Gutenberg
+
+    ```{r}
+    dickinson <- gutenberg_download(c(2678, 2679, 12241), 
+                                meta_fields = "author")
+    ```
+
+    I've chosen 3 collections of Emily Dickinson's poems, edited and published by her friends. These early publications were grouped by theme (chosen arbitrarily by the editors), so I wouldn't necessarily expect a topic model to distinguish between volumes. However, I do expect that some thematic grouping may occur, and I'm curious to see whether this aligns with the volume-by-volume selection much (i.e. if certain topics are strong predictors of certain volumes).
+
+2.  Run your own topic model on these books, changing the k of topics, and evaluating accuracy.
+
+    ```{r}
+
+    dickinson <- dickinson %>%
+      filter(!is.na(text))
+
+    # Divide into documents, each representing one poem
+    dksn_poem <- dickinson %>%
+      mutate(booknumber = ifelse(gutenberg_id==2678, "1", ifelse(gutenberg_id==2679, "2", "3"))) %>%
+      group_by(booknumber) %>%
+      mutate(poem = cumsum(str_detect(text, regex("[XVI]+\\.")))) %>%
+      ungroup() %>%
+      filter(poem > 0) %>%
+      unite(document, booknumber, poem)
+
+    # Split into words
+    dksn_poem_word <- dksn_poem %>%
+      unnest_tokens(word, text)
+
+    # Find document-word counts
+    dksn_word_counts <- dksn_poem_word %>%
+      anti_join(stop_words) %>%
+      count(document, word, sort = TRUE) %>%
+      ungroup()
+
+    dksn_word_counts
+
+    # Cast into DTM format for LDA analysis
+
+    dksn_poems_dtm <- dksn_word_counts %>%
+      cast_dtm(document, word, n)
+
+    tm::inspect(dksn_poems_dtm)
+
+    ```
+
+    ```{r}
+    dksn_poems_lda <- LDA(dksn_poems_dtm, k = 3, control = list(seed = 1234))
+    ```
+
+    ```{r}
+    dksn_poems_gamma <- tidy(dksn_poems_lda, matrix = "gamma")
+    dksn_poems_gamma
+    ```
+
+    ```{r}
+    dksn_topics <- tidy(dksn_poems_lda, matrix = "beta")
+    head(dksn_topics, n = 10)
+
+    dksn_top_terms <- dksn_topics %>%
+      group_by(topic) %>%
+      top_n(15, beta) %>%
+      ungroup() %>%
+      arrange(topic, -beta)
+
+    dksn_top_terms %>%
+      mutate(term = reorder_within(term, beta, topic)) %>%
+      ggplot(aes(beta, term, fill = factor(topic))) +
+      geom_col(show.legend = FALSE) +
+      facet_wrap(~ topic, scales = "free", ncol = 4) +
+      scale_y_reordered() +
+      theme_tufte(base_family = "Helvetica")
+
+    ```
+
+    These topics share many of the same top terms (e.g. "day"), making them difficult to interpret; however, it does appear that the topic model has generated topics not based on volume or volume-specific theme but perhaps by imagery: topic 1 has many astronomical and metaphysical terms, topic 2 has many natural and seasonal words, and topic 3 has some more embodied imagery, although the overlap makes this far from clear.
+
+    We'll save this 3-topic model for the poem/volume comparison but try with a greater number of topics to see if clearer thematic distinctions emerge.
+
+    ```{r}
+    dksn_poems_lda2 <- LDA(dksn_poems_dtm, k = 10, control = list(seed = 1234))
+    ```
+
+    ```{r}
+    dksn_topics2 <- tidy(dksn_poems_lda2, matrix = "beta")
+    head(dksn_topics2, n = 10)
+
+    dksn_top_terms2 <- dksn_topics2 %>%
+      group_by(topic) %>%
+      top_n(10, beta) %>%
+      ungroup() %>%
+      arrange(topic, -beta)
+
+    dksn_top_terms2 %>%
+      mutate(term = reorder_within(term, beta, topic)) %>%
+      ggplot(aes(beta, term, fill = factor(topic))) +
+      geom_col(show.legend = FALSE) +
+      facet_wrap(~ topic, scales = "free", ncol = 4) +
+      scale_y_reordered() +
+      theme_tufte(base_family = "Helvetica")
+    ```
+
+    These appear more thematically distinct; I would likely use this or a similar number of topics in any form of thematic analysis or topical classification of these poems.
+
+    However, returning to our question about whether a topic model can pick up on any of the editorial grouping between volumes in this particular edition:
+
+    ```{r}
+
+    # First separate the document name into title and chapter
+    dksn_poems_gamma <- dksn_poems_gamma %>%
+      separate(document, c("vol", "poem"), sep = "_", convert = TRUE)
+
+    dksn_poem_classifications <- dksn_poems_gamma %>%
+      group_by(vol, poem) %>%
+      top_n(1, gamma) %>%
+      ungroup()
+
+    dksn_vol_topics <- dksn_poem_classifications %>%
+      count(vol, topic) %>%
+      group_by(vol) %>%
+      top_n(1, n) %>%
+      ungroup() %>%
+      transmute(consensus = vol, topic)
+
+    dksn_poem_classifications %>%
+      inner_join(dksn_vol_topics, by = "topic") %>%
+      filter(vol != consensus)
+
+    # Look document-word pairs were to see which words in each documents were assigned
+    # to a given topic
+
+    assignments <- augment(dksn_poems_lda, data = dksn_poems_dtm)
+    assignments
+
+    assignments <- assignments %>%
+      separate(document, c("vol", "poem"), sep = "_", convert = TRUE) %>%
+      inner_join(dksn_vol_topics, by = c(".topic" = "topic"))
+
+    assignments %>%
+      count(vol, consensus, wt = count) %>%
+      group_by(vol) %>%
+      mutate(percent = n / sum(n)) %>%
+      ggplot(aes(consensus, vol, fill = percent)) +
+      geom_tile() +
+      scale_fill_gradient2(high = "red", label = percent_format()) +
+      geom_text(aes(x = consensus, y = vol, label = scales::percent(percent))) +
+      theme_tufte(base_family = "Helvetica") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            panel.grid = element_blank()) +
+      labs(x = "Vol words assigned to",
+           y = "Vol words came from",
+           fill = "% of assignments")
+    ```
+
+    These results are barely better than chance. Words from volumes 1 and 3, in particular, were equally likely to be assigned to either, with volume 2 appearing slightly more lexically and topically distinct.
+
+    If there is significant lexical difference between volumes, this model has been unable to learn it. It would be interesting to compare this with one of the later editions (e.g. Franklin, 1998) to see if there are lexical distinctions in Dickinson's work over time which can be utilized by a topic model to categorize her poems chronologically.
+
+3.  Validate different pre-processing techniques using `preText` on the new book(s) of your choice.
